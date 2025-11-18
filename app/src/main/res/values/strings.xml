@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Bluetoothball</string>
+    <string name="homescreen_preamble"> Make sure you have paired the devices before proceeding.</string>
+    <string name="choose_instruction">One device must be the ball, while the other drives the ball.:</string>
+    <string name="bluetooth_rationale_1">Granted the requested permissions allows the app to use the bluetooth functionality of your device.</string>
+    <string name="bluetooth_rationale_2">Please enable the requested permissions in Settings to allow the app to use bluetooth on your device.</string>
+    <string name="no_thanks">No thanks.</string>
+    <string name="driver_button_text">Give Me The Wheel</string>
+    <string name="meatball_button_text">Going For A Ride</string>
+    <string name="logo_description">BluetoothballLogo</string>
+    <string name="game_title">Bluetooth ball!</string>
+    <string name="find_meatball_button">Find A ball</string>
+    <string name="find_meatball_button_instructions">Try connecting again.</string>
+    <string name="fragment_select_a_meatball_label">Select a ball</string>
+    <string name="fragment_driver_connected_label">Driving!</string>
+    <string name="connected_to_meatball">You\'re connected to ball !</string>
+</resources>
