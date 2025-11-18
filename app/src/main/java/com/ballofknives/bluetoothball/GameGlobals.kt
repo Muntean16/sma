@@ -1,4 +1,4 @@
-package com.ballofknives.bluetoothmeatball
+package com.ballofknives.bluetoothball
 
 class GameGlobals {
     companion object Constants {

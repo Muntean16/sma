@@ -3,29 +3,29 @@
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/driver_nav_graph"
-        app:startDestination="@id/selectAMeatballFragment">
+        app:startDestination="@id/selectAballFragment">
 
     <fragment
-            android:id="@+id/selectAMeatballFragment"
-            android:name="com.ballofknives.bluetoothmeatball.SelectAMeatballFragment"
-            android:label="@string/fragment_select_a_meatball_label"
-            tools:layout="@layout/fragment_select_a_meatball" >
+            android:id="@+id/selectAballFragment"
+            android:name="com.ballofknives.bluetoothball.SelectAballFragment"
+            android:label="@string/fragment_select_a_ball_label"
+            tools:layout="@layout/fragment_select_a_ball" >
         <action
-                android:id="@+id/action_selectAMeatballFragment_to_driverConnectedFragment"
+                android:id="@+id/action_selectAballFragment_to_driverConnectedFragment"
                 app:destination="@id/driverConnectedFragment" />
     </fragment>
     <fragment
             android:id="@+id/driverConnectedFragment"
-            android:name="com.ballofknives.bluetoothmeatball.DriverConnectedFragment"
+            android:name="com.ballofknives.bluetoothball.DriverConnectedFragment"
             android:label="DriverConnectedFragment"
             tools:layout="@layout/fragment_driver_connected" >
         <argument
-                android:name="meatball"
+                android:name="ball"
                 app:argType="string" />
         <action
-                android:id="@+id/action_driverConnectedFragment_to_selectAMeatballFragment"
-                app:destination="@id/selectAMeatballFragment"
-                app:popUpTo="@id/selectAMeatballFragment"
+                android:id="@+id/action_driverConnectedFragment_to_selectAballFragment"
+                app:destination="@id/selectAballFragment"
+                app:popUpTo="@id/selectAballFragment"
                 app:popUpToInclusive="true" />
     </fragment>
 </navigation>

@@ -1,4 +1,4 @@
-package com.ballofknives.bluetoothmeatball
+package com.ballofknives.bluetoothball
 
 /**
  * Used as a wrapper for data that is exposed via a LiveData that represents an event.

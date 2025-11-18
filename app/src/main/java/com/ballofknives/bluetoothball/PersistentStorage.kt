@@ -1,4 +1,4 @@
-package com.ballofknives.bluetoothmeatball
+package com.ballofknives.bluetoothball
 
 import android.content.Context
 import android.content.SharedPreferences

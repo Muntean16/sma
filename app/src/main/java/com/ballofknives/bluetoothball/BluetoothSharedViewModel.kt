@@ -1,20 +1,39 @@
-
-package com.ballofknives.bluetoothmeatball
+package com.ballofknives.bluetoothball
 
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothAdapter
+import android.app.Application
 import android.bluetooth.BluetoothDevice
+import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothSocket
 import android.content.Context
-import android.os.*
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import java.lang.ref.WeakReference
-import java.util.*
+import java.util.UUID
 
-class BluetoothGameClient(var adapter: BluetoothAdapter? = null,  private val handler : BTMsgHandler) {
+class BluetoothSharedViewModel(application: Application) : AndroidViewModel(application) {
+    private val adapter = (application.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager).adapter
+
+    private val _connected = MutableLiveData<Event<Boolean>>()
+    val connected: LiveData<Event<Boolean>> = _connected
+
+    val _bondedDevices = MutableLiveData<List<BluetoothDevice>>()
+    val bondedDevices: LiveData<List<BluetoothDevice>> = _bondedDevices
+
+
+    var connectThread: ConnectThread? = null
+
+    private var connectedThread: ConnectedThread? = null
+
+    var mState: Int = STATE_NONE
+
+    private var localSocket: BluetoothSocket? = null
+    private var localInStream: InputStream? = null
+    private var localOutStream: OutputStream? = null
 
     companion object {
         val GameUUID: UUID = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
@@ -25,17 +44,20 @@ class BluetoothGameClient(var adapter: BluetoothAdapter? = null,  private val ha
         const val STATE_CONNECTED: Int = 3
     }
 
-    var connectThread: ConnectThread? = null
-    private var connectedThread: ConnectedThread? = null
-
-    var mState: Int = STATE_NONE
-
     init {
         mState = STATE_NONE
+        refreshBondedDevices()
+        _connected.postValue(Event(false))
+    }
+
+    @SuppressLint("MissingPermission")
+    fun refreshBondedDevices(){
+        _bondedDevices.value = adapter.bondedDevices.toList()
     }
 
 
     @Synchronized fun start(){
+        //Log.i(Constants.TAG, "Starting BluetoothGameService")
         if( connectThread != null ){
             connectThread?.cancel()
             connectThread = null
@@ -47,7 +69,7 @@ class BluetoothGameClient(var adapter: BluetoothAdapter? = null,  private val ha
         }
     }
 
-    @Synchronized fun connect(device: BluetoothDevice ){
+    @Synchronized fun connect(device: BluetoothDevice){
         if( mState == STATE_CONNECTING){
             if( connectThread != null ){
                 connectThread?.cancel()
@@ -64,7 +86,7 @@ class BluetoothGameClient(var adapter: BluetoothAdapter? = null,  private val ha
         connectThread?.start()
     }
 
-    @Synchronized fun connected( socket: BluetoothSocket?, device: BluetoothDevice?){
+    @Synchronized fun connected(socket: BluetoothSocket?){
         if( connectThread != null){
             connectThread?.cancel()
             connectThread = null
@@ -75,7 +97,7 @@ class BluetoothGameClient(var adapter: BluetoothAdapter? = null,  private val ha
             connectedThread = null
         }
 
-        handler?.obtainMessage(GameGlobals.CONNECTED, -1, -1, device)?.sendToTarget()
+        _connected.postValue(Event(true))
 
         connectedThread = ConnectedThread( socket )
         connectedThread?.start()
@@ -84,7 +106,7 @@ class BluetoothGameClient(var adapter: BluetoothAdapter? = null,  private val ha
 
     @Synchronized fun stop(){
         if ( connectThread != null ){
-            connectThread?.cancel()
+            connectThread?.cancel() // TODO wont be null but the ? implies it might be null. What to do?
             connectThread = null
         }
         if ( connectedThread != null ){
@@ -92,30 +114,34 @@ class BluetoothGameClient(var adapter: BluetoothAdapter? = null,  private val ha
             connectedThread = null
         }
         mState = STATE_NONE
+        _connected.postValue(Event(false))
     }
 
     fun write( out : ByteArray ){
         synchronized(this){
             if( mState != STATE_CONNECTED ) {
-                return
+                return // TODO better error handling
             }
             connectedThread?.write(out)
         }
     }
 
     private fun connectionFailed(){
+        Log.i(Constants.TAG, "Connection Failed!")
+        _connected.postValue(Event(false))
         mState = STATE_NONE
         this.start()
     }
 
     private fun connectionLost(){
+        _connected.postValue(Event(false))
         mState = STATE_NONE
         this.start()
     }
 
     @SuppressLint("MissingPermission")
     inner class ConnectThread(private var localDevice: BluetoothDevice?): Thread(){
-        private var localSocket : BluetoothSocket? = null
+        //private var localSocket : BluetoothSocket? = null
 
         init {
             try {
@@ -142,11 +168,10 @@ class BluetoothGameClient(var adapter: BluetoothAdapter? = null,  private val ha
             }
             catch(e: IOException){
                 try{
-                    localSocket?.
-
-                    close()
+                    localSocket?.close()
                 }
                 catch( e2: IOException){
+                    Log.e(Constants.TAG, "Unable to close() socket. Error during connection")
                 }
                 connectionFailed()
                 return
@@ -155,7 +180,7 @@ class BluetoothGameClient(var adapter: BluetoothAdapter? = null,  private val ha
             synchronized(this){
                 connectThread = null
             }
-            connected( localSocket, localDevice)
+            connected( localSocket)
         }
 
 
@@ -164,16 +189,18 @@ class BluetoothGameClient(var adapter: BluetoothAdapter? = null,  private val ha
                 localSocket?.close()
             }
             catch( e: IOException){
+                Log.e(Constants.TAG, "Unable to close() socket in cancel()")
             }
         }
     }
 
     inner class ConnectedThread(socket: BluetoothSocket? ): Thread(){
-        private var localSocket: BluetoothSocket? = null
-        private var localInStream: InputStream? = null
-        private var localOutStream: OutputStream? = null
 
+        //private var localSocket: BluetoothSocket? = null
+        //private var localInStream: InputStream? = null
+        //private var localOutStream: OutputStream? = null
         init{
+            //Log.e(Constants.TAG, "Create ConnectedThread")
             localSocket = socket
             var tmpIn: InputStream? = null
             var tmpOut: OutputStream? = null
@@ -181,7 +208,8 @@ class BluetoothGameClient(var adapter: BluetoothAdapter? = null,  private val ha
                 tmpIn = socket?.inputStream
                 tmpOut = socket?.outputStream
             }
-            catch( e: IOException ){
+            catch( e: IOException){
+                Log.e(Constants.TAG, "Error getting socket streams")
             }
 
             localInStream = tmpIn
@@ -199,11 +227,13 @@ class BluetoothGameClient(var adapter: BluetoothAdapter? = null,  private val ha
             while(mState == STATE_CONNECTED){
                 try{
                     bytes = localInStream?.read(buffer)!!
-                    handler?.obtainMessage(GameGlobals.MESSAGE_READ, -1, -1, buffer)?.sendToTarget()
                 }
                 catch( e: IOException){
-                    if(e.message != null)
+                    if(e.message != null) {
+                        Log.e(TAG, "before run error")
                         Log.e(Constants.TAG, e.message!!)
+                        Log.e(TAG, "after run error")
+                    }
                     connectionLost()
                     break;
                 }
@@ -212,8 +242,8 @@ class BluetoothGameClient(var adapter: BluetoothAdapter? = null,  private val ha
 
         fun write(buffer: ByteArray){
             try{
+                //Log.i(TAG, "sending bytes: ${buffer.toHex()}")
                 localOutStream?.write(buffer)
-                handler?.obtainMessage(GameGlobals.MESSAGE_WRITE, -1, -1, buffer)?.sendToTarget()
             }
             catch( e: IOException){
                 Log.e(Constants.TAG, "Error during write() in connected thread")
@@ -225,9 +255,8 @@ class BluetoothGameClient(var adapter: BluetoothAdapter? = null,  private val ha
                 localSocket?.close()
             }
             catch( e: IOException){
+                Log.e(Constants.TAG, "close() of connection socket failed!")
             }
         }
     }
-
-
 }

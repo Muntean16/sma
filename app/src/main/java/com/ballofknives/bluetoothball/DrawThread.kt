@@ -1,4 +1,4 @@
-package com.ballofknives.bluetoothmeatball
+package com.ballofknives.bluetoothball
 
 import android.graphics.Canvas
 import android.view.SurfaceHolder

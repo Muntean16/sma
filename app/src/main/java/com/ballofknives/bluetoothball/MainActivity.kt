@@ -1,4 +1,4 @@
-package com.ballofknives.bluetoothmeatball
+package com.ballofknives.bluetoothball
 
 import android.Manifest
 import android.annotation.SuppressLint
@@ -17,7 +17,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 
-const val TAG = "BluetoothMeatball"
+const val TAG = "Bluetoothball"
 
 class MainActivity : AppCompatActivity() {
 
@@ -81,8 +81,7 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.BLUETOOTH_CONNECT
             )
             bluetoothPermissionRequest.launch(permissions)
-        }
-        else{
+        } else{
             val permissions = arrayOf(
                 Manifest.permission.BLUETOOTH,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -143,11 +142,11 @@ class MainActivity : AppCompatActivity() {
 
     }
 
-    fun chooseMeatball(view: View) {
+    fun chooseBall(view: View) {
         if(isBluetoothPermissionGranted()){
-            val meatballIntent = Intent( this, MeatballActivity::class.java)
-            meatballIntent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
-            startActivity( meatballIntent )
+            val ballIntent = Intent( this, BallActivity::class.java)
+            ballIntent.flags = Intent.FLAG_ACTIVITY_NO_HISTORY
+            startActivity( ballIntent )
         }
         else{
             if(shouldShowBluetoothPermissionRationale()){

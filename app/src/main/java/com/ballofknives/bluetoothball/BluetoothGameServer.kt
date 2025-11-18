@@ -1,33 +1,25 @@
-package com.ballofknives.bluetoothmeatball
+package com.ballofknives.bluetoothball
 
-import android.Manifest
 import android.annotation.SuppressLint
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.bluetooth.BluetoothServerSocket
 import android.bluetooth.BluetoothSocket
-import android.content.Context
-import android.content.pm.PackageManager
 import android.os.Handler
 import android.os.Bundle
-import android.os.Looper
-import android.os.Message
 import android.util.Log
-import androidx.core.app.ActivityCompat
 
 import java.io.IOException
 import java.io.InputStream
 import java.io.OutputStream
-import java.lang.ref.WeakReference
 import java.nio.ByteBuffer
 import java.util.*
-import kotlin.math.abs
 
 class BluetoothGameServer(private var adapter: BluetoothAdapter?, private var handler: Handler?) {
 
     companion object {
         val GameUUID: UUID = UUID.fromString("fa87c0d0-afac-11de-8a39-0800200c9a66");
-        const val BLUETOOTH_SERVICE_NAME = "Bluetooth Meatball"
+        const val BLUETOOTH_SERVICE_NAME = "Bluetooth ball"
         const val STATE_NONE: Int = 0
         const val STATE_LISTEN: Int = 1
         const val STATE_CONNECTING: Int = 2

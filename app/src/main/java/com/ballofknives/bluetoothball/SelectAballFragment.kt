@@ -1,8 +1,7 @@
-package com.ballofknives.bluetoothmeatball
+package com.ballofknives.bluetoothball
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.bluetooth.BluetoothDevice
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -13,74 +12,58 @@ import android.hardware.SensorManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Looper
 import android.provider.Settings
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
-import android.widget.ListView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.app.ActivityCompat
-import androidx.fragment.app.Fragment
 import androidx.appcompat.app.AlertDialog
-import androidx.core.content.ContextCompat.getSystemService
-import androidx.core.content.getSystemService
+import androidx.core.app.ActivityCompat
 import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
-import androidx.navigation.findNavController
 import androidx.navigation.fragment.findNavController
-
-import androidx.recyclerview.widget.DividerItemDecoration
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.ballofknives.bluetoothmeatball.databinding.FragmentSelectAMeatballBinding
+import com.ballofknives.bluetoothball.databinding.FragmentSelectABallBinding
 import java.nio.ByteBuffer
 import kotlin.math.abs
 
-class SelectAMeatballFragment : Fragment() , SensorEventListener {
-    private var _binding : FragmentSelectAMeatballBinding? = null
+class SelectAballFragment : Fragment(), SensorEventListener {
+    private var _binding: FragmentSelectABallBinding? = null
     private val binding get() = _binding!!
-    private lateinit var listView: ListView
-    private lateinit var letterId: String
-
 
     private var eventCount = 0
 
-    private var xEvent : Float = 0.0f
-    private var yEvent : Float = 0.0f
+    private var xEvent: Float = 0.0f
+    private var yEvent: Float = 0.0f
 
     private val sharedViewModel: BluetoothSharedViewModel by activityViewModels()
 
-    lateinit var persistentStorage : PersistentStorage
-    var mSensorManager : SensorManager?= null
-    var mAccelerometer : Sensor?= null
-
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-    }
+    private lateinit var persistentStorage: PersistentStorage
+    private var mSensorManager: SensorManager? = null
+    private var mAccelerometer: Sensor? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
-        _binding = FragmentSelectAMeatballBinding.inflate(inflater, container, false)
+    ): View {
+        _binding = FragmentSelectABallBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
         mSensorManager = requireContext().getSystemService(Context.SENSOR_SERVICE) as SensorManager
         mAccelerometer = mSensorManager!!.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
         persistentStorage = PersistentStorage(requireContext())
 
-        binding.btnGet.setOnClickListener{
-                v -> onUpdatePairedDeviceListClicked(v)
+        binding.btnGet.setOnClickListener {
+            onUpdatePairedDeviceListClicked()
         }
 
         requestBluetoothPermission()
@@ -88,9 +71,9 @@ class SelectAMeatballFragment : Fragment() , SensorEventListener {
         sharedViewModel.connected.observe(viewLifecycleOwner, Observer {
             it.getContentIfNotHandled()?.let { isConnected ->
                 if (isConnected) {
-                    val bundle = bundleOf(Pair("meatball", "meatball"))
-                    this@SelectAMeatballFragment.findNavController()
-                        .navigate(R.id.action_selectAMeatballFragment_to_driverConnectedFragment, bundle)
+                    val bundle = bundleOf(Pair("ball", "ball"))
+                    this@SelectAballFragment.findNavController()
+                        .navigate(R.id.action_selectAballFragment_to_driverConnectedFragment, bundle)
                 }
             }
         })
@@ -103,19 +86,28 @@ class SelectAMeatballFragment : Fragment() , SensorEventListener {
 
 
     private val bluetoothPermissionRequest =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){ map ->
-            val userAcknowledgement = map.values.all{ it -> it }
-            if(userAcknowledgement) {
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { map ->
+            val userAcknowledgement = map.values.all { it }
+            if (userAcknowledgement) {
                 persistentStorage.userHasAcknowledgedBluetoothPermissionRationale = false
             }
         }
 
-    private fun isBluetoothPermissionGranted() : Boolean{
+    private fun isBluetoothPermissionGranted(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH_CONNECT ) == PackageManager.PERMISSION_GRANTED
-        } else{
-            ((ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.BLUETOOTH) == PackageManager.PERMISSION_GRANTED ) &&
-                    (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED ))
+            ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.BLUETOOTH_CONNECT
+            ) == PackageManager.PERMISSION_GRANTED
+        } else {
+            ((ActivityCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.BLUETOOTH
+            ) == PackageManager.PERMISSION_GRANTED) &&
+                    (ActivityCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.ACCESS_FINE_LOCATION
+                    ) == PackageManager.PERMISSION_GRANTED))
         }
     }
 
@@ -123,8 +115,10 @@ class SelectAMeatballFragment : Fragment() , SensorEventListener {
     private fun shouldShowBluetoothPermissionRationale(): Boolean {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH_CONNECT)
-        } else{
-            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) || shouldShowRequestPermissionRationale(Manifest.permission.BLUETOOTH)
+        } else {
+            shouldShowRequestPermissionRationale(Manifest.permission.ACCESS_FINE_LOCATION) || shouldShowRequestPermissionRationale(
+                Manifest.permission.BLUETOOTH
+            )
         }
 
     }
@@ -133,14 +127,13 @@ class SelectAMeatballFragment : Fragment() , SensorEventListener {
         return persistentStorage.userHasAcknowledgedBluetoothPermissionRationale
     }
 
-    private fun requestBluetoothPermission(){
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    private fun requestBluetoothPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val permissions = arrayOf(
                 Manifest.permission.BLUETOOTH_CONNECT
             )
             bluetoothPermissionRequest.launch(permissions)
-        }
-        else{
+        } else {
             val permissions = arrayOf(
                 Manifest.permission.BLUETOOTH,
                 Manifest.permission.ACCESS_FINE_LOCATION
@@ -149,7 +142,7 @@ class SelectAMeatballFragment : Fragment() , SensorEventListener {
         }
     }
 
-    private fun showRationaleDialog(){
+    private fun showRationaleDialog() {
         AlertDialog.Builder(requireContext())
             .setMessage(getString(R.string.bluetooth_rationale_1))
             .setPositiveButton(getString(android.R.string.ok)) { _, _ ->
@@ -159,7 +152,7 @@ class SelectAMeatballFragment : Fragment() , SensorEventListener {
             .show()
     }
 
-    private fun showPreviouslyAcknowledgedRationaleDialog(){
+    private fun showPreviouslyAcknowledgedRationaleDialog() {
         AlertDialog.Builder(requireContext())
             .setMessage(getString(R.string.bluetooth_rationale_2))
             .setNegativeButton(getString(R.string.no_thanks), null)
@@ -182,28 +175,27 @@ class SelectAMeatballFragment : Fragment() , SensorEventListener {
     override fun onSensorChanged(event: SensorEvent?) {
         eventCount++
         val cutoff = 2
-        if ((event != null) && (eventCount == 1)){
-            eventCount=0
+        if ((event != null) && (eventCount == 1)) {
+            eventCount = 0
             synchronized(this) {
-                xEvent = if (abs(event.values[0]) > cutoff){
+                xEvent = if (abs(event.values[0]) > cutoff) {
                     -1.0f * event.values[0]
                 } else {
                     0.0f
                 }
 
-                yEvent = if(abs(event.values[1]) > cutoff){
+                yEvent = if (abs(event.values[1]) > cutoff) {
                     event.values[1]
-                } else{
+                } else {
                     0.0f
                 }
                 val shortX = java.lang.Float.floatToIntBits(xEvent)
-                val xBytes = ByteBuffer.allocate(java.lang.Float.BYTES).putInt(shortX)
                 val shortY = java.lang.Float.floatToIntBits(yEvent)
-                val yBytes = ByteBuffer.allocate(java.lang.Float.BYTES).putInt(shortY)
-                val allBytes = ByteBuffer.allocate(2*java.lang.Float.BYTES).putInt(shortX).putInt(shortY)
-                if(abs(xEvent) > 0.5 || abs(yEvent) > cutoff) {
+                val allBytes =
+                    ByteBuffer.allocate(2 * java.lang.Float.BYTES).putInt(shortX).putInt(shortY)
+                if (abs(xEvent) > 0.5 || abs(yEvent) > cutoff) {
                     synchronized(this) {
-                        sharedViewModel?.write(allBytes.array())
+                        sharedViewModel.write(allBytes.array())
                     }
                 }
             }
@@ -212,20 +204,21 @@ class SelectAMeatballFragment : Fragment() , SensorEventListener {
 
 
     @SuppressLint("MissingPermission")
-    fun updatePairedDeviceList(){
+    fun updatePairedDeviceList() {
         val deviceNames = sharedViewModel._bondedDevices.value?.map { it.name } ?: listOf()
-        val arrayAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, deviceNames)
+        val arrayAdapter =
+            ArrayAdapter(requireContext(), android.R.layout.simple_list_item_1, deviceNames)
         val listView = binding.deviceListView
         listView.adapter = arrayAdapter
         listView.onItemClickListener = AdapterView.OnItemClickListener { _, _, index, _ ->
             val toConnect = sharedViewModel._bondedDevices.value?.elementAt(index)
 
-            if( toConnect != null) {
+            if (toConnect != null) {
                 try {
-                    Toast.makeText(requireContext(), "Trying to connect.", Toast.LENGTH_SHORT).show()
-                    sharedViewModel?.connect(toConnect)
-                }
-                catch(e: Exception){
+                    Toast.makeText(requireContext(), "Trying to connect.", Toast.LENGTH_SHORT)
+                        .show()
+                    sharedViewModel.connect(toConnect)
+                } catch (_: Exception) {
                 }
             }
 
@@ -235,31 +228,24 @@ class SelectAMeatballFragment : Fragment() , SensorEventListener {
 
     override fun onResume() {
         super.onResume()
-        mSensorManager!!.registerListener(this,mAccelerometer,
-            SensorManager.SENSOR_DELAY_GAME)
-        sharedViewModel?.start()
+        mSensorManager!!.registerListener(
+            this, mAccelerometer,
+            SensorManager.SENSOR_DELAY_GAME
+        )
+        sharedViewModel.start()
 
 
     }
 
-    override fun onPause() {
-        super.onPause()
-    }
-
-
-
-    fun onUpdatePairedDeviceListClicked(view: View){
-        if(isBluetoothPermissionGranted()){
+    private fun onUpdatePairedDeviceListClicked() {
+        if (isBluetoothPermissionGranted()) {
             updatePairedDeviceList()
-        }
-        else{
-            if(shouldShowBluetoothPermissionRationale()){
+        } else {
+            if (shouldShowBluetoothPermissionRationale()) {
                 showRationaleDialog()
-            }
-            else if(userHasPreviouslyAcknowledgedBluetoothPermissionRationale()) {
+            } else if (userHasPreviouslyAcknowledgedBluetoothPermissionRationale()) {
                 showPreviouslyAcknowledgedRationaleDialog()
-            }
-            else{
+            } else {
                 requestBluetoothPermission()
             }
         }

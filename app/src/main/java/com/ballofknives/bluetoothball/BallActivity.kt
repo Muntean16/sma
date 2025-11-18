@@ -1,4 +1,4 @@
- package com.ballofknives.bluetoothmeatball
+ package com.ballofknives.bluetoothball
 
 import android.annotation.SuppressLint
 import android.content.pm.ActivityInfo
@@ -11,7 +11,7 @@ import android.view.WindowManager
 import androidx.appcompat.app.AppCompatActivity
 import java.lang.ref.WeakReference
 
- class MeatballActivity : AppCompatActivity() {
+ class BallActivity : AppCompatActivity() {
     private var gameSurface : GameSurface ?= null
     private var handler: BTMsgHandler? = null
     private var btServer: BluetoothGameServer? = null

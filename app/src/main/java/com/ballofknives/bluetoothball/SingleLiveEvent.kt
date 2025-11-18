@@ -1,4 +1,4 @@
-package com.ballofknives.bluetoothmeatball
+package com.ballofknives.bluetoothball
 
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData

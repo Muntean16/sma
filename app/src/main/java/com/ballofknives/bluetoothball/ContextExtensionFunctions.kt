@@ -1,4 +1,4 @@
-package com.ballofknives.bluetoothmeatball
+package com.ballofknives.bluetoothball
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothManager

@@ -1,4 +1,4 @@
-package com.ballofknives.bluetoothmeatball
+package com.ballofknives.bluetoothball
 
 import android.content.Context
 import android.graphics.*
@@ -7,8 +7,6 @@ import android.view.Display
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import android.view.WindowManager
-import kotlin.math.pow
-import kotlin.math.sqrt
 
 class GameSurface(context: Context) : SurfaceView(context), SurfaceHolder.Callback{
     private var cx : Float = 0.toFloat()
