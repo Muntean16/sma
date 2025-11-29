@@ -25,11 +25,17 @@
             android:theme="@style/AppTheme"
             android:enableOnBackInvokedCallback="true"
             tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".BallActivity">
+        <activity android:name=".game.BallActivity">
         </activity>
-        <activity android:name=".DriverActivity">
+        <activity android:name=".game.DriverActivity">
         </activity>
-        <activity android:name=".MainActivity"
+        <activity android:name=".ui.GameResultsActivity">
+        </activity>
+        <activity android:name=".ui.HighScoresActivity">
+        </activity>
+        <activity android:name=".ui.ShopActivity">
+        </activity>
+        <activity android:name=".ui.MainActivity"
                 android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>

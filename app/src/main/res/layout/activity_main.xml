@@ -42,15 +42,40 @@
             app:layout_constraintHorizontal_bias="0.5" app:layout_constraintEnd_toEndOf="parent"
     />
 
-    <Button
+    <com.google.android.material.button.MaterialButton
             android:layout_width="300dp"
             android:layout_height="wrap_content"
             android:text="@string/ball_button_text"
             android:id="@+id/ball_button"
-
             android:onClick="chooseBall"
-            app:layout_constraintBottom_toBottomOf="parent" app:layout_constraintTop_toBottomOf="@+id/driver_button"
-            app:layout_constraintStart_toStartOf="parent" app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintTop_toBottomOf="@+id/driver_button"
+            app:layout_constraintBottom_toTopOf="@+id/highScoresButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintEnd_toEndOf="parent"/>
+    
+    <com.google.android.material.button.MaterialButton
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:text="Cel Mai Bun Scor"
+            android:id="@+id/highScoresButton"
+            android:onClick="viewHighScores"
+            app:layout_constraintTop_toBottomOf="@+id/ball_button"
+            app:layout_constraintBottom_toTopOf="@+id/shopButton"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintEnd_toEndOf="parent"/>
+    
+    <com.google.android.material.button.MaterialButton
+            android:layout_width="300dp"
+            android:layout_height="wrap_content"
+            android:text="Magazin"
+            android:id="@+id/shopButton"
+            android:onClick="openShop"
+            app:layout_constraintTop_toBottomOf="@+id/highScoresButton"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintEnd_toEndOf="parent"/>
     <ImageView
             android:layout_width="wrap_content"
