@@ -9,3 +9,4 @@ data class HighScore(
     val timestamp: Long = System.currentTimeMillis()
 ) : Serializable
 
+

@@ -26,3 +26,4 @@ interface ShopItemDao {
     suspend fun markAsPurchased(id: String)
 }
 
+

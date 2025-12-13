@@ -23,3 +23,4 @@ class SingleLiveEvent<T> : MutableLiveData<T>() {
     }
 }
 
+

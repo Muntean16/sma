@@ -15,3 +15,4 @@ data class ShopItemEntity(
     val isPurchased: Boolean = false
 )
 
+

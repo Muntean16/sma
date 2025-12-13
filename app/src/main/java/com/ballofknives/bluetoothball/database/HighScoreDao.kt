@@ -36,3 +36,4 @@ interface HighScoreDao {
     suspend fun getHighScoreCount(): Int
 }
 
+
