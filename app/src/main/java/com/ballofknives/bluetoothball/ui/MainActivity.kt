@@ -17,6 +17,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import com.ballofknives.bluetoothball.R
+import com.ballofknives.bluetoothball.database.UserManager
 import com.ballofknives.bluetoothball.game.BallActivity
 import com.ballofknives.bluetoothball.game.DriverActivity
 import com.ballofknives.bluetoothball.utils.PersistentStorage
@@ -27,6 +28,17 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Check if user is logged in
+        val userManager = UserManager(this)
+        if (userManager.getCurrentUserId() == null) {
+            val loginIntent = Intent(this, LoginActivity::class.java)
+            loginIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            startActivity(loginIntent)
+            finish()
+            return
+        }
+        
         setContentView(R.layout.activity_main)
 
         @SuppressLint("SourceLockedOrientationActivity")
@@ -212,6 +224,15 @@ class MainActivity : AppCompatActivity() {
         val shopIntent = Intent(this, ShopActivity::class.java)
         startActivity(shopIntent)
         overridePendingTransition(R.anim.slide_in_up, R.anim.fade_out)
+    }
+    
+    fun logout(view: View) {
+        UserManager(this).logout()
+        val loginIntent = Intent(this, LoginActivity::class.java)
+        loginIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+        startActivity(loginIntent)
+        overridePendingTransition(R.anim.fade_in, R.anim.fade_out)
+        finish()
     }
 }
 

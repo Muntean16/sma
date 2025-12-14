@@ -11,8 +11,8 @@ data class ShopItemEntity(
     val description: String,
     val price: Int,
     val itemType: String,
-    val value: String,
-    val isPurchased: Boolean = false
+    val value: String
+    // isPurchased is now tracked in UserPurchaseEntity per user
 )
 
 

@@ -10,37 +10,42 @@ class PlayerManager(private val context: Context) {
     
     private val database = AppDatabase.getDatabase(context)
     private val dao = database.playerDao()
-    private var isInitialized = false
+    private val userManager = UserManager(context)
     
-    private suspend fun ensureInitialized() {
-        if (!isInitialized) {
-            val player = dao.getPlayer()
-            if (player == null) {
-                dao.insertPlayer(PlayerEntity(id = 1, totalPoints = 0))
-            }
-            isInitialized = true
+    private fun getUserId(): Long {
+        return userManager.getCurrentUserId() ?: throw IllegalStateException("No user logged in")
+    }
+    
+    private suspend fun ensureInitialized(userId: Long) {
+        val player = dao.getPlayer(userId)
+        if (player == null) {
+            dao.insertPlayer(PlayerEntity(id = userId, totalPoints = 0))
         }
     }
     
     fun getPlayer(): PlayerEntity {
         return runBlocking(Dispatchers.IO) {
-            ensureInitialized()
-            dao.getPlayer() ?: PlayerEntity(id = 1, totalPoints = 0)
+            val userId = getUserId()
+            ensureInitialized(userId)
+            dao.getPlayer(userId) ?: PlayerEntity(id = userId, totalPoints = 0)
         }
     }
     
     fun addPoints(points: Int) {
         CoroutineScope(Dispatchers.IO).launch {
-            dao.addPoints(points)
+            val userId = getUserId()
+            ensureInitialized(userId)
+            dao.addPoints(userId, points)
         }
     }
     
     fun subtractPoints(points: Int): Boolean {
         return runBlocking(Dispatchers.IO) {
-            ensureInitialized()
-            val player = dao.getPlayer() ?: return@runBlocking false
+            val userId = getUserId()
+            ensureInitialized(userId)
+            val player = dao.getPlayer(userId) ?: return@runBlocking false
             if (player.totalPoints >= points) {
-                dao.subtractPoints(points)
+                dao.subtractPoints(userId, points)
                 true
             } else {
                 false
@@ -50,20 +55,25 @@ class PlayerManager(private val context: Context) {
     
     fun updateBallColor(color: String) {
         CoroutineScope(Dispatchers.IO).launch {
-            dao.updateBallColor(color)
+            val userId = getUserId()
+            ensureInitialized(userId)
+            dao.updateBallColor(userId, color)
         }
     }
     
     fun updateExtraTime(seconds: Int) {
         CoroutineScope(Dispatchers.IO).launch {
-            dao.updateExtraTime(seconds)
+            val userId = getUserId()
+            ensureInitialized(userId)
+            dao.updateExtraTime(userId, seconds)
         }
     }
     
     fun getTotalPoints(): Int {
         return runBlocking(Dispatchers.IO) {
-            ensureInitialized()
-            dao.getPlayer()?.totalPoints ?: 0
+            val userId = getUserId()
+            ensureInitialized(userId)
+            dao.getPlayer(userId)?.totalPoints ?: 0
         }
     }
 }

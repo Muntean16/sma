@@ -22,8 +22,7 @@ interface ShopItemDao {
     @Update
     suspend fun updateItem(item: ShopItemEntity)
     
-    @Query("UPDATE shop_items SET isPurchased = 1 WHERE id = :id")
-    suspend fun markAsPurchased(id: String)
+    // Purchases are now tracked in UserPurchaseEntity
 }
 
 

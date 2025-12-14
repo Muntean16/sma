@@ -127,6 +127,8 @@ class ShopActivity : AppCompatActivity() {
     }
     
     private fun addItemView(item: ShopItemEntity) {
+        val isPurchased = shopManager.isItemPurchased(item.id)
+        
         val cardView = CardView(this).apply {
             layoutParams = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
@@ -170,8 +172,8 @@ class ShopActivity : AppCompatActivity() {
         }
         
         val buyButton = Button(this).apply {
-            text = if (item.isPurchased) "Achiziționat" else "Cumpără"
-            isEnabled = !item.isPurchased && playerManager.getTotalPoints() >= item.price
+            text = if (isPurchased) "Achiziționat" else "Cumpără"
+            isEnabled = !isPurchased && playerManager.getTotalPoints() >= item.price
             setOnClickListener {
                 purchaseItem(item)
             }

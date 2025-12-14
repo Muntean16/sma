@@ -6,7 +6,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "player")
 data class PlayerEntity(
     @PrimaryKey
-    val id: Int = 1,
+    val id: Long, // userId
     var totalPoints: Int = 0,
     var selectedBallColor: String = "default",
     var extraTimeSeconds: Int = 0

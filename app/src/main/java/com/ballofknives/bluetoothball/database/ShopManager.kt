@@ -10,8 +10,14 @@ class ShopManager(private val context: Context) {
     
     private val database = AppDatabase.getDatabase(context)
     private val dao = database.shopItemDao()
+    private val purchaseDao = database.userPurchaseDao()
     private val playerManager = PlayerManager(context)
+    private val userManager = UserManager(context)
     private var isInitialized = false
+    
+    private fun getUserId(): Long {
+        return userManager.getCurrentUserId() ?: throw IllegalStateException("No user logged in")
+    }
     
     private suspend fun ensureInitialized() {
         if (!isInitialized) {
@@ -108,6 +114,13 @@ class ShopManager(private val context: Context) {
         }
     }
     
+    fun isItemPurchased(itemId: String): Boolean {
+        return runBlocking(Dispatchers.IO) {
+            val userId = getUserId()
+            purchaseDao.getPurchase(userId, itemId) != null
+        }
+    }
+    
     fun getItemsByType(type: String): List<ShopItemEntity> {
         return runBlocking(Dispatchers.IO) {
             ensureInitialized()
@@ -118,14 +131,17 @@ class ShopManager(private val context: Context) {
     fun purchaseItem(itemId: String): Boolean {
         return runBlocking(Dispatchers.IO) {
             ensureInitialized()
+            val userId = getUserId()
             val item = dao.getItemById(itemId) ?: return@runBlocking false
             
-            if (item.isPurchased) {
+            // Check if already purchased
+            if (isItemPurchased(itemId)) {
                 return@runBlocking false
             }
             
             if (playerManager.subtractPoints(item.price)) {
-                dao.markAsPurchased(itemId)
+                // Record purchase
+                purchaseDao.insertPurchase(UserPurchaseEntity(userId = userId, shopItemId = itemId))
                 
                 when (item.itemType) {
                     "ball_color" -> {

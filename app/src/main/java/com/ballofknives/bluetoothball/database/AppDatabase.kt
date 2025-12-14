@@ -5,12 +5,14 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [HighScoreEntity::class, PlayerEntity::class, ShopItemEntity::class], version = 2, exportSchema = false)
+@Database(entities = [HighScoreEntity::class, PlayerEntity::class, ShopItemEntity::class, UserEntity::class, UserPurchaseEntity::class], version = 3, exportSchema = false)
 abstract class AppDatabase : RoomDatabase() {
     
     abstract fun highScoreDao(): HighScoreDao
     abstract fun playerDao(): PlayerDao
     abstract fun shopItemDao(): ShopItemDao
+    abstract fun userDao(): UserDao
+    abstract fun userPurchaseDao(): UserPurchaseDao
     
     companion object {
         @Volatile

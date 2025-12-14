@@ -227,8 +227,6 @@ class BluetoothGameClient(var adapter: BluetoothAdapter? = null,  private val ha
             }
         }
     }
-
-
 }
 
 
