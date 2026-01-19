@@ -40,3 +40,4 @@ class DrawThread (surfaceHolder: SurfaceHolder, panel : GameSurface) : Thread() 
 
 
 
+
