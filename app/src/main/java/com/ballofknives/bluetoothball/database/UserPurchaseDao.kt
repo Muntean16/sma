@@ -17,3 +17,5 @@ interface UserPurchaseDao {
     suspend fun deletePurchase(userId: Long, shopItemId: String)
 }
 
+
+

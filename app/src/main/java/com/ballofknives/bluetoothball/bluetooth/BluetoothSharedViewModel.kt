@@ -133,7 +133,7 @@ class BluetoothSharedViewModel(application: Application) : AndroidViewModel(appl
 
     @Synchronized fun stop(){
         if ( connectThread != null ){
-            connectThread?.cancel() // TODO wont be null but the ? implies it might be null. What to do?
+            connectThread?.cancel()
             connectThread = null
         }
         if ( connectedThread != null ){

@@ -12,3 +12,5 @@ data class UserEntity(
     val code: String = "" // Codul utilizatorului
 )
 
+
+

@@ -113,6 +113,31 @@ class ShopManager(private val context: Context) {
             dao.getAllItems()
         }
     }
+
+    fun getCurrentBallColor(): String {
+        return playerManager.getPlayer().selectedBallColor
+    }
+
+    fun selectBallColor(itemId: String): Boolean {
+        return runBlocking(Dispatchers.IO) {
+            ensureInitialized()
+            val userId = getUserId()
+            val item = dao.getItemById(itemId) ?: return@runBlocking false
+
+            // Only ball color items can be selected and they must be purchased
+            if (item.itemType != "ball_color") {
+                return@runBlocking false
+            }
+
+            val hasPurchased = purchaseDao.getPurchase(userId, itemId) != null
+            if (!hasPurchased) {
+                return@runBlocking false
+            }
+
+            playerManager.updateBallColor(item.value)
+            true
+        }
+    }
     
     fun isItemPurchased(itemId: String): Boolean {
         return runBlocking(Dispatchers.IO) {

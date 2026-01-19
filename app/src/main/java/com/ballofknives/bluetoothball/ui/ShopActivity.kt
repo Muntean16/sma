@@ -73,14 +73,15 @@ class ShopActivity : AppCompatActivity() {
     private fun loadShopItems() {
         lifecycleScope.launch {
             val items = shopManager.getAllItems()
+            val selectedColor = shopManager.getCurrentBallColor()
             
             runOnUiThread {
-                displayItems(items)
+                displayItems(items, selectedColor)
             }
         }
     }
     
-    private fun displayItems(items: List<ShopItemEntity>) {
+    private fun displayItems(items: List<ShopItemEntity>, selectedBallColor: String) {
         itemsContainer.removeAllViews()
         
         if (items.isEmpty()) {
@@ -107,7 +108,7 @@ class ShopActivity : AppCompatActivity() {
             itemsContainer.addView(sectionTitle)
             
             ballItems.forEach { item ->
-                addItemView(item)
+                addItemView(item, selectedBallColor)
             }
         }
         
@@ -121,13 +122,15 @@ class ShopActivity : AppCompatActivity() {
             itemsContainer.addView(sectionTitle)
             
             timeItems.forEach { item ->
-                addItemView(item)
+                addItemView(item, selectedBallColor)
             }
         }
     }
     
-    private fun addItemView(item: ShopItemEntity) {
+    private fun addItemView(item: ShopItemEntity, selectedBallColor: String) {
         val isPurchased = shopManager.isItemPurchased(item.id)
+        val isSelectedBall =
+            item.itemType == "ball_color" && item.value.equals(selectedBallColor, ignoreCase = true)
         
         val cardView = CardView(this).apply {
             layoutParams = LinearLayout.LayoutParams(
@@ -172,10 +175,36 @@ class ShopActivity : AppCompatActivity() {
         }
         
         val buyButton = Button(this).apply {
-            text = if (isPurchased) "Achiziționat" else "Cumpără"
-            isEnabled = !isPurchased && playerManager.getTotalPoints() >= item.price
-            setOnClickListener {
-                purchaseItem(item)
+            when (item.itemType) {
+                "ball_color" -> {
+                    text = when {
+                        isSelectedBall -> "Selectată"
+                        isPurchased -> "Folosește"
+                        else -> "Cumpără"
+                    }
+
+                    isEnabled = when {
+                        isSelectedBall -> false
+                        isPurchased -> true
+                        else -> playerManager.getTotalPoints() >= item.price
+                    }
+
+                    setOnClickListener {
+                        if (isPurchased) {
+                            selectBallColor(item)
+                        } else {
+                            purchaseItem(item)
+                        }
+                    }
+                }
+
+                else -> {
+                    text = if (isPurchased) "Achiziționat" else "Cumpără"
+                    isEnabled = !isPurchased && playerManager.getTotalPoints() >= item.price
+                    setOnClickListener {
+                        purchaseItem(item)
+                    }
+                }
             }
         }
         
@@ -235,6 +264,29 @@ class ShopActivity : AppCompatActivity() {
             }
             .setNegativeButton("Anulează", null)
             .show()
+    }
+
+    private fun selectBallColor(item: ShopItemEntity) {
+        lifecycleScope.launch {
+            val success = shopManager.selectBallColor(item.id)
+            runOnUiThread {
+                if (success) {
+                    AlertDialog.Builder(this@ShopActivity)
+                        .setTitle("Culoare selectată")
+                        .setMessage("Folosești acum ${item.name}.")
+                        .setPositiveButton("OK") { _, _ ->
+                            loadShopItems()
+                        }
+                        .show()
+                } else {
+                    AlertDialog.Builder(this@ShopActivity)
+                        .setTitle("Eroare")
+                        .setMessage("Selectarea nu a putut fi finalizată.")
+                        .setPositiveButton("OK", null)
+                        .show()
+                }
+            }
+        }
     }
 }
 
